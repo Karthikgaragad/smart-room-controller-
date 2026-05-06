@@ -1,0 +1,48 @@
+// Pin definitions
+const int pirPin = 2;        // PIR sensor output
+const int relayFan = 3;      // Relay for fan
+const int relayBulb = 4;     // Relay for bulb
+const int lm35Pin = A0;      // LM35 temperature sensor
+
+void setup() {
+  pinMode(pirPin, INPUT);
+  pinMode(relayFan, OUTPUT);
+  pinMode(relayBulb, OUTPUT);
+
+  digitalWrite(relayFan, LOW);
+  digitalWrite(relayBulb, LOW);
+
+  Serial.begin(9600);
+}
+
+void loop() {
+
+  int motion = digitalRead(pirPin);   // Read PIR sensor
+
+  // Read temperature from LM35
+  int tempValue = analogRead(lm35Pin);
+  float voltage = tempValue * (5.0 / 1023.0);
+  float temperature = voltage * 100;   // LM35: 10mV per °C
+
+  Serial.print("Temperature: ");
+  Serial.println(temperature);
+
+  if (motion == HIGH) {
+    // Motion detected → Bulb ON
+    digitalWrite(relayBulb, HIGH);
+
+    // Check temperature for fan
+    if (temperature > 25) {
+      digitalWrite(relayFan, HIGH);
+    } else {
+      digitalWrite(relayFan, LOW);
+    }
+
+  } else {
+    // No motion → everything OFF
+    digitalWrite(relayBulb, LOW);
+    digitalWrite(relayFan, LOW);
+  }
+
+  delay(500);
+}
